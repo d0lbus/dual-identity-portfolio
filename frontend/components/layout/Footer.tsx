@@ -1,27 +1,62 @@
+// frontend/components/layout/Footer.tsx
+"use client";
+
 import Link from "next/link";
-import { primaryNavigation } from "@/data/navigation";
+import { usePathname } from "next/navigation";
+import {
+  primaryNavigation,
+  seNavigation,
+  vaNavigation,
+} from "@/data/navigation";
 import { siteConfig } from "@/data/site";
 
+function getFooterConfig(pathname: string) {
+  if (pathname.startsWith("/va")) {
+    return {
+      brandHref: "/va",
+      nav: vaNavigation,
+    };
+  }
+
+  if (pathname.startsWith("/se")) {
+    return {
+      brandHref: "/se",
+      nav: seNavigation,
+    };
+  }
+
+  return {
+    brandHref: "/",
+    nav: primaryNavigation,
+  };
+}
+
 export function Footer() {
+  const pathname = usePathname();
+  const { brandHref, nav } = getFooterConfig(pathname);
+
   return (
     <footer className="border-t border-outline-variant/10 bg-surface-container-low px-6 py-10 lg:pl-28">
       <div className="page-frame flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
         <div className="space-y-3">
-          <p className="font-headline text-xl italic text-on-surface">
+          <Link
+            href={brandHref}
+            className="font-headline text-xl italic text-on-surface"
+          >
             {siteConfig.name}
-          </p>
+          </Link>
           <p className="max-w-xl text-sm leading-7 text-on-surface-variant">
-            Dark editorial portfolio foundation prepared for the dual identity,
-            VA, and SE route system.
+            A dual-identity editorial portfolio shaped around service,
+            architecture, and precise implementation.
           </p>
         </div>
 
         <div className="flex flex-wrap gap-5">
-          {primaryNavigation.map((item) => (
+          {nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="font-label text-[11px] uppercase tracking-[0.18em] text-on-surface-variant transition-colors hover:text-on-surface"
+              className="font-label text-[10px] uppercase tracking-[0.2em] text-on-surface-variant transition-colors hover:text-on-surface"
             >
               {item.label}
             </Link>
