@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@theme {
+:root {
   --color-background: #0e0e0e;
   --color-surface: #0e0e0e;
   --color-surface-container-lowest: #000000;
@@ -26,9 +26,7 @@
   --tracking-nav: 0.18em;
   --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
   --breakpoint-3xl: 120rem;
-}
 
-:root {
   color-scheme: dark;
 }
 

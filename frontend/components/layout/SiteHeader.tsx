@@ -1,37 +1,72 @@
+// frontend/components/layout/SiteHeader.tsx
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
-import { primaryNavigation } from "@/data/navigation";
+import {
+  primaryNavigation,
+  seNavigation,
+  vaNavigation,
+} from "@/data/navigation";
 import { siteConfig } from "@/data/site";
 import { PrimaryButton } from "@/components/shared/PrimaryButton";
 
+function getHeaderConfig(pathname: string) {
+  if (pathname.startsWith("/va")) {
+    return {
+      brandHref: "/va",
+      nav: vaNavigation,
+      ctaHref: "/va/contact",
+      ctaLabel: "Hire Me",
+    };
+  }
+
+  if (pathname.startsWith("/se")) {
+    return {
+      brandHref: "/se",
+      nav: seNavigation,
+      ctaHref: "/se/contact",
+      ctaLabel: "Work With Me",
+    };
+  }
+
+  return {
+    brandHref: "/",
+    nav: primaryNavigation,
+    ctaHref: "/se/contact",
+    ctaLabel: "Connect",
+  };
+}
+
 export function SiteHeader() {
   const pathname = usePathname();
+  const { brandHref, nav, ctaHref, ctaLabel } = getHeaderConfig(pathname);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       <div className="page-frame">
         <div className="glass-nav mt-4 flex h-18 items-center justify-between rounded-sm px-4 soft-outline md:px-6 lg:pl-8 lg:pr-6">
           <Link
-            href="/"
-            className="font-headline text-lg italic tracking-tight text-on-surface md:text-xl"
+            href={brandHref}
+            className="font-headline text-base italic tracking-tight text-on-surface md:text-lg"
           >
             {siteConfig.name}
           </Link>
 
-          <nav className="hidden items-center gap-8 md:flex">
-            {primaryNavigation.map((item) => {
-              const isActive = pathname === item.href;
+          <nav className="hidden items-center gap-7 md:flex">
+            {nav.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== "/" && pathname.startsWith(item.href));
 
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "font-label text-[11px] uppercase tracking-[0.2em] tailored-hover",
+                    "font-label text-[10px] uppercase tracking-[0.22em] tailored-hover",
                     isActive
                       ? "text-on-surface"
                       : "text-on-surface-variant hover:text-on-surface",
@@ -51,8 +86,9 @@ export function SiteHeader() {
             >
               <Menu className="h-4 w-4" />
             </button>
-            <PrimaryButton href="/se/contact" className="hidden md:inline-flex">
-              {siteConfig.ctaLabel}
+
+            <PrimaryButton href={ctaHref} className="hidden md:inline-flex">
+              {ctaLabel}
             </PrimaryButton>
           </div>
         </div>

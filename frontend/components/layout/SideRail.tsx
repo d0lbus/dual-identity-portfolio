@@ -1,3 +1,4 @@
+// frontend/components/layout/SideRail.tsx
 "use client";
 
 import Link from "next/link";
@@ -6,8 +7,21 @@ import { cn } from "@/lib/cn";
 import { railNavigation } from "@/data/navigation";
 import { siteConfig } from "@/data/site";
 
+function getRailContext(pathname: string) {
+  if (pathname.startsWith("/va")) {
+    return "Virtual Assistance";
+  }
+
+  if (pathname.startsWith("/se")) {
+    return "Software Engineering";
+  }
+
+  return "Dual Identity";
+}
+
 export function SideRail() {
   const pathname = usePathname();
+  const contextLabel = getRailContext(pathname);
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-20 border-r border-outline-variant/15 bg-surface-container-lowest lg:flex lg:flex-col lg:items-center lg:py-24">
@@ -43,7 +57,7 @@ export function SideRail() {
         <div className="mt-auto flex flex-col items-center gap-4">
           <div className="h-14 w-px bg-outline-variant/30" />
           <span className="origin-center rotate-180 [writing-mode:vertical-rl] font-label text-[9px] uppercase tracking-[0.28em] text-outline">
-            Frontend Phase 1
+            {contextLabel}
           </span>
         </div>
       </div>
