@@ -1,6 +1,14 @@
 // backend/src/modules/chatbot/chatbot.repository.ts
 import type { FastifyInstance } from "fastify";
-import type { ChatbotPortfolioType } from "./chatbot.type";
+import type {
+  ChatbotPortfolioType,
+  ChatbotHistoryMessage,
+  ChatbotRole,
+} from "./chatbot.type";
+
+function isChatbotRole(value: string): value is ChatbotRole {
+  return value === "user" || value === "assistant" || value === "system";
+}
 
 export async function getOrCreateChatSession(
   app: FastifyInstance,
@@ -38,18 +46,28 @@ export async function createChatMessage(
 
 export async function listRecentChatMessages(
   app: FastifyInstance,
-  chatSessionId: string,
-  limit = 10,
-) {
+  sessionId: string,
+): Promise<ChatbotHistoryMessage[]> {
   const messages = await app.prisma.chatMessage.findMany({
     where: {
-      chatSessionId,
+      chatSessionId: sessionId,
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: "asc",
     },
-    take: limit,
+    take: 12,
   });
 
-  return messages.reverse();
+  return messages.map((message) => {
+    if (!isChatbotRole(message.role)) {
+      throw new Error(
+        `Invalid chatbot role found in database: ${message.role}`,
+      );
+    }
+
+    return {
+      role: message.role,
+      content: message.content,
+    };
+  });
 }

@@ -4,6 +4,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import type { ContactPayload } from "@/types/contact";
 import { Reveal } from "@/components/shared/Reveal";
+import { submitContactInquiry } from "@/lib/api";
 
 const initialState = {
   name: "",
@@ -25,6 +26,7 @@ export function ContactConversionPanel() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success">(
     "idle",
   );
+  const [errorMessage, setErrorMessage] = useState("");
 
   const payload = useMemo<ContactPayload>(
     () => ({
@@ -38,15 +40,21 @@ export function ContactConversionPanel() {
     [form],
   );
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("submitting");
+    setErrorMessage("");
 
-    window.setTimeout(() => {
-      console.log("Mock SE contact submission", payload);
+    try {
+      await submitContactInquiry(payload);
       setStatus("success");
       setForm(initialState);
-    }, 700);
+    } catch (error) {
+      setStatus("idle");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to submit inquiry.",
+      );
+    }
   }
 
   return (
@@ -149,11 +157,15 @@ export function ContactConversionPanel() {
           {status === "submitting" ? "Submitting..." : "Send Project Inquiry"}
         </button>
 
-        <p className="mt-4 text-xs leading-6 text-on-surface-variant">
-          {status === "success"
-            ? "Mock submission complete. Final payload shape is preserved for backend integration later."
-            : "Frontend-first mocked submit only. Backend API wiring comes in the backend phase."}
-        </p>
+        {status === "success" ? (
+          <p className="mt-4 text-xs leading-6 text-on-surface-variant">
+            Inquiry received successfully.
+          </p>
+        ) : null}
+
+        {errorMessage ? (
+          <p className="mt-4 text-xs leading-6 text-red-300">{errorMessage}</p>
+        ) : null}
       </form>
     </Reveal>
   );

@@ -1,9 +1,11 @@
 // backend/src/modules/chatbot/chatbot.type.ts
 export type ChatbotPortfolioType = "dualidentity" | "va" | "se";
 
+export type ChatbotRole = "user" | "assistant" | "system";
+
 export type ChatbotMessagePayload = {
   sessionKey: string;
-  portfolioType: ChatbotPortfolioType;
+  portfolioType: "va" | "se" | "dualidentity";
   message: string;
 };
 
@@ -13,6 +15,6 @@ export type ChatbotMessageResponse = {
 };
 
 export type ChatbotHistoryMessage = {
-  role: "user" | "assistant" | "system";
+  role: ChatbotRole;
   content: string;
 };

@@ -5,6 +5,7 @@ import { FormEvent, useMemo, useState } from "react";
 import { vaInquiryTypes } from "@/data/va";
 import type { ContactPayload } from "@/types/contact";
 import { Reveal } from "@/components/shared/Reveal";
+import { submitContactInquiry } from "@/lib/api";
 
 const initialState = {
   name: "",
@@ -18,6 +19,7 @@ export function ContactForm() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success">(
     "idle",
   );
+  const [errorMessage, setErrorMessage] = useState("");
 
   const payload = useMemo<ContactPayload>(
     () => ({
@@ -31,15 +33,21 @@ export function ContactForm() {
     [form],
   );
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("submitting");
+    setErrorMessage("");
 
-    window.setTimeout(() => {
-      console.log("Mock VA contact submission", payload);
+    try {
+      await submitContactInquiry(payload);
       setStatus("success");
       setForm(initialState);
-    }, 700);
+    } catch (error) {
+      setStatus("idle");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Failed to submit inquiry.",
+      );
+    }
   }
 
   return (
@@ -138,11 +146,15 @@ export function ContactForm() {
           {status === "submitting" ? "Transmitting..." : "Transmit Inquiry"}
         </button>
 
-        <p className="mt-4 text-xs leading-6 text-on-surface-variant">
-          {status === "success"
-            ? "Mock submission complete. The payload shape is preserved for backend integration later."
-            : "This is currently a mocked frontend-first submission. Backend API wiring comes in Phase 6."}
-        </p>
+        {status === "success" ? (
+          <p className="mt-4 text-xs leading-6 text-on-surface-variant">
+            Inquiry received successfully.
+          </p>
+        ) : null}
+
+        {errorMessage ? (
+          <p className="mt-4 text-xs leading-6 text-red-300">{errorMessage}</p>
+        ) : null}
       </form>
     </Reveal>
   );

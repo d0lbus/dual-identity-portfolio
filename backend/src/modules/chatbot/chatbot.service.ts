@@ -8,7 +8,6 @@ import {
 import type {
   ChatbotMessagePayload,
   ChatbotMessageResponse,
-  ChatbotHistoryMessage,
 } from "./chatbot.type";
 
 export async function sendChatbotMessage(
@@ -41,15 +40,12 @@ export async function sendChatbotMessage(
 
   await createChatMessage(app, session.id, "user", payload.message);
 
-  const recentMessages: ChatbotHistoryMessage[] = await listRecentChatMessages(
-    app,
-    session.id,
-  );
+  const recentMessages = await listRecentChatMessages(app, session.id);
 
   const reply = await generateChatReply({
     env: app.env,
     portfolioType: payload.portfolioType,
-    messages: recentMessages.map((message: ChatbotHistoryMessage) => ({
+    messages: recentMessages.map((message) => ({
       role: message.role === "system" ? "assistant" : message.role,
       content: message.content,
     })),
