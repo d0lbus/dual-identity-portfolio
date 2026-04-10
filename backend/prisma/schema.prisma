@@ -7,20 +7,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-model ContactSubmission {
-  id            String   @id @default(cuid())
-  name          String
-  email         String
-  message       String
-  sourcePage    String
-  portfolioType String
-  inquiryType   String?
-  status        String   @default("new")
-  createdAt     DateTime @default(now())
-
-  @@index([portfolioType, createdAt])
-  @@index([sourcePage, createdAt])
-}
 
 model ChatSession {
   id            String        @id @default(cuid())

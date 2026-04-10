@@ -5,7 +5,11 @@ import { FormEvent, useMemo, useState } from "react";
 import { vaInquiryTypes } from "@/data/va";
 import type { ContactPayload } from "@/types/contact";
 import { Reveal } from "@/components/shared/Reveal";
-import { submitContactInquiry } from "@/lib/api";
+import {
+  contactEmail,
+  copyContactEmail,
+  openContactMailClient,
+} from "@/lib/mailto";
 
 const initialState = {
   name: "",
@@ -16,9 +20,9 @@ const initialState = {
 
 export function ContactForm() {
   const [form, setForm] = useState(initialState);
-  const [status, setStatus] = useState<"idle" | "submitting" | "success">(
-    "idle",
-  );
+  const [status, setStatus] = useState<
+    "idle" | "opening" | "success" | "copied"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
   const payload = useMemo<ContactPayload>(
@@ -33,20 +37,32 @@ export function ContactForm() {
     [form],
   );
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setStatus("submitting");
+    setStatus("opening");
     setErrorMessage("");
 
     try {
-      await submitContactInquiry(payload);
+      openContactMailClient(payload);
       setStatus("success");
-      setForm(initialState);
-    } catch (error) {
+    } catch {
       setStatus("idle");
-      setErrorMessage(
-        error instanceof Error ? error.message : "Failed to submit inquiry.",
-      );
+      setErrorMessage("Unable to open your email client.");
+    }
+  }
+
+  async function handleCopyEmail() {
+    setErrorMessage("");
+
+    try {
+      const copied = await copyContactEmail(contactEmail);
+      setStatus(copied ? "copied" : "idle");
+
+      if (!copied) {
+        setErrorMessage("Clipboard access is not available in this browser.");
+      }
+    } catch {
+      setErrorMessage("Unable to copy the email address.");
     }
   }
 
@@ -140,15 +156,29 @@ export function ContactForm() {
 
         <button
           type="submit"
-          disabled={status === "submitting"}
+          disabled={status === "opening"}
           className="mt-8 inline-flex w-full items-center justify-center rounded-sm bg-primary px-8 py-4 font-label text-[11px] uppercase tracking-[0.22em] text-on-primary transition-all duration-300 hover:tracking-[0.28em] disabled:opacity-70"
         >
-          {status === "submitting" ? "Transmitting..." : "Transmit Inquiry"}
+          {status === "opening" ? "Opening Mail Client..." : "Open Email Draft"}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleCopyEmail}
+          className="mt-3 inline-flex w-full items-center justify-center rounded-sm bg-transparent px-8 py-4 font-label text-[11px] uppercase tracking-[0.22em] text-primary transition-all duration-300 hover:bg-surface-container-high hover:tracking-[0.28em]"
+        >
+          Copy Email Address
         </button>
 
         {status === "success" ? (
           <p className="mt-4 text-xs leading-6 text-on-surface-variant">
-            Inquiry received successfully.
+            Your email client should open with the message prefilled.
+          </p>
+        ) : null}
+
+        {status === "copied" ? (
+          <p className="mt-4 text-xs leading-6 text-on-surface-variant">
+            Email address copied: {contactEmail}
           </p>
         ) : null}
 

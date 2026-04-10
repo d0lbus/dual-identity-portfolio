@@ -9,7 +9,6 @@ import rateLimitPlugin from "./plugins/rate-limit";
 import securityPlugin from "./plugins/security";
 import { AppError } from "./shared/errors/app-error";
 import healthRoutes from "./modules/health/health.route";
-import contactRoutes from "./modules/contact/contact.route";
 import chatbotRoutes from "./modules/chatbot/chatbot.route";
 
 export async function buildApp() {
@@ -25,7 +24,6 @@ export async function buildApp() {
   await app.register(prismaPlugin);
 
   await app.register(healthRoutes);
-  await app.register(contactRoutes);
   await app.register(chatbotRoutes);
 
   app.setErrorHandler((error, request, reply) => {
